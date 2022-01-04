@@ -2,7 +2,7 @@ package com.javagame;
 
 public class ControllerComponent {
     
-    public void update()
+    public void update(GameObject gameObject, float deltaTime)
     {
         
     }

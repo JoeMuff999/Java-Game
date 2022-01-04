@@ -15,18 +15,12 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.*;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.g3d.environment.*;
 
 import com.badlogic.gdx.utils.TimeUtils;
@@ -36,7 +30,6 @@ import com.javagame.*;
 public class Main extends ApplicationAdapter {
 	private PerspectiveCamera mainCamera;
 	private ModelBatch modelBatch;
-	private ModelBuilder modelBuilder;
 	private Model cubeModel;
 	private ModelInstance cubeInstance;
 	private Environment environment;
@@ -45,11 +38,15 @@ public class Main extends ApplicationAdapter {
 
 	public static final int ScreenWidth = 800;
 	public static final int ScreenHeight = 600;
+	public GameObjectFactory factory;
 
 	public double total_angle = 0;
+	public float fixedDeltaTime; // figure out how to do this properly :)
 
 	@Override
 	public void create(){
+		factory = new GameObjectFactory();
+		gameObjects = new ArrayList<GameObject>();
 		mainCamera = new PerspectiveCamera(90, ScreenWidth, ScreenHeight);
 		mainCamera.position.set(0f, 0f, 3f);
 		mainCamera.lookAt(0f,0f,0f);
@@ -57,12 +54,10 @@ public class Main extends ApplicationAdapter {
 		mainCamera.far = 300f;
 
 		modelBatch = new ModelBatch();
-		modelBuilder = new ModelBuilder();
-		cubeModel = modelBuilder.createBox(2f, 2f, 2f,
-									new Material(ColorAttribute.createDiffuse(Color.BLUE)), 
-									VertexAttributes.Usage.Position|VertexAttributes.Usage.Normal
-					);
-		cubeInstance = new ModelInstance(cubeModel, 0, 0, 0);
+
+		// cubeInstance = new ModelInstance(cubeModel, 0, 0, 0);
+		GameObject agent = factory.CreateAgent(new Vector3(0,0,0), new Quaternion());
+		gameObjects.add(agent);
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f, 0.8f, 0.8f, 1f));
 	}
@@ -71,12 +66,13 @@ public class Main extends ApplicationAdapter {
 	{
 		Gdx.gl.glClearColor(0.68f, 0.85f, 0.90f, 0.2f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT| GL20.GL_DEPTH_BUFFER_BIT);
-		cameraOrbit();
+		// cameraOrbit();
 		mainCamera.update();
 		//physics update should be on a separate timer. when you go to update the gameobjects, basically just pass a bool that says if you should update the physics or not
-		
 		modelBatch.begin(mainCamera);
-		modelBatch.render(cubeInstance);
+		for (GameObject go : gameObjects) {
+			go.update(Gdx.graphics.getDeltaTime(), Gdx.graphics.getDeltaTime(), true, modelBatch);
+		}
 		modelBatch.end();
 	}
 
@@ -94,6 +90,6 @@ public class Main extends ApplicationAdapter {
 	@Override
 	public void dispose () {
 		modelBatch.dispose();
-		cubeModel.dispose();
+		// cubeModel.dispose();
 	}
 }
