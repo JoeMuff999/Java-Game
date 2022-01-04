@@ -2,15 +2,21 @@ package com.javagame;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+
+import java.util.ArrayList;
 import java.util.Iterator;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -18,128 +24,76 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.utils.*;
+import com.badlogic.gdx.graphics.g3d.environment.*;
+
 import com.badlogic.gdx.utils.TimeUtils;
 
+import com.javagame.*;
+
 public class Main extends ApplicationAdapter {
-	private Texture dropImage;
-	private Texture bucketImage;
-	private Sound dropSound;
-	private Music rainMusic;
-	private SpriteBatch batch;
-	private OrthographicCamera camera;
-	private Rectangle bucket;
-	private Array<Rectangle> raindrops;
-	private long lastDropTime;
+	private PerspectiveCamera mainCamera;
+	private ModelBatch modelBatch;
+	private ModelBuilder modelBuilder;
+	private Model cubeModel;
+	private ModelInstance cubeInstance;
+	private Environment environment;
+
+	private ArrayList<GameObject> gameObjects;
+
+	public static final int ScreenWidth = 800;
+	public static final int ScreenHeight = 600;
+
+	public double total_angle = 0;
 
 	@Override
-	public void create() {
-		// load the images for the droplet and the bucket, 64x64 pixels each
-		dropImage = new Texture(Gdx.files.internal("droplet.png"));
-		bucketImage = new Texture(Gdx.files.internal("bucket.png"));
+	public void create(){
+		mainCamera = new PerspectiveCamera(90, ScreenWidth, ScreenHeight);
+		mainCamera.position.set(0f, 0f, 3f);
+		mainCamera.lookAt(0f,0f,0f);
+		mainCamera.near = 0.1f;
+		mainCamera.far = 300f;
 
-		// load the drop sound effect and the rain background "music"
-		dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
-		rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
-
-		// start the playback of the background music immediately
-		rainMusic.setLooping(true);
-		rainMusic.play();
-
-		// create the camera and the SpriteBatch
-		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 800, 480);
-		batch = new SpriteBatch();
-
-		// create a Rectangle to logically represent the bucket
-		bucket = new Rectangle();
-		bucket.x = 800 / 2 - 64 / 2; // center the bucket horizontally
-		bucket.y = 20; // bottom left corner of the bucket is 20 pixels above the bottom screen edge
-		bucket.width = 64;
-		bucket.height = 64;
-
-		// create the raindrops array and spawn the first raindrop
-		raindrops = new Array<Rectangle>();
-		spawnRaindrop();
+		modelBatch = new ModelBatch();
+		modelBuilder = new ModelBuilder();
+		cubeModel = modelBuilder.createBox(2f, 2f, 2f,
+									new Material(ColorAttribute.createDiffuse(Color.BLUE)), 
+									VertexAttributes.Usage.Position|VertexAttributes.Usage.Normal
+					);
+		cubeInstance = new ModelInstance(cubeModel, 0, 0, 0);
+		environment = new Environment();
+		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f, 0.8f, 0.8f, 1f));
 	}
-
-	private void spawnRaindrop() {
-		Rectangle raindrop = new Rectangle();
-		raindrop.x = MathUtils.random(0, 800 - 64);
-		raindrop.y = 480;
-		raindrop.width = 64;
-		raindrop.height = 64;
-		raindrops.add(raindrop);
-		lastDropTime = TimeUtils.nanoTime();
-	}
-
 	@Override
-	public void render() {
-		// clear the screen with a dark blue color. The
-		// arguments to clear are the red, green
-		// blue and alpha component in the range [0,1]
-		// of the color to be used to clear the screen.
-		ScreenUtils.clear(0, 0, 0.2f, 1);
+	public void render()
+	{
+		Gdx.gl.glClearColor(0.68f, 0.85f, 0.90f, 0.2f);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT| GL20.GL_DEPTH_BUFFER_BIT);
+		cameraOrbit();
+		mainCamera.update();
+		//physics update should be on a separate timer. when you go to update the gameobjects, basically just pass a bool that says if you should update the physics or not
+		
+		modelBatch.begin(mainCamera);
+		modelBatch.render(cubeInstance);
+		modelBatch.end();
+	}
 
-		// tell the camera to update its matrices.
-		camera.update();
-
-		// tell the SpriteBatch to render in the
-		// coordinate system specified by the camera.
-		batch.setProjectionMatrix(camera.combined);
-
-		// begin a new batch and draw the bucket and
-		// all drops
-		batch.begin();
-		batch.draw(bucketImage, bucket.x, bucket.y);
-		for (Rectangle raindrop : raindrops) {
-			batch.draw(dropImage, raindrop.x, raindrop.y);
-		}
-		batch.end();
-
-		// process user input
-		if (Gdx.input.isTouched()) {
-			Vector3 touchPos = new Vector3();
-			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-			camera.unproject(touchPos);
-			bucket.x = touchPos.x - 64 / 2;
-		}
-		if (Gdx.input.isKeyPressed(Keys.LEFT))
-			bucket.x -= 400 * Gdx.graphics.getDeltaTime();
-		if (Gdx.input.isKeyPressed(Keys.RIGHT))
-			bucket.x += 400 * Gdx.graphics.getDeltaTime();
-
-		// make sure the bucket stays within the screen bounds
-		if (bucket.x < 0)
-			bucket.x = 0;
-		if (bucket.x > 800 - 64)
-			bucket.x = 800 - 64;
-
-		// check if we need to create a new raindrop
-		if (TimeUtils.nanoTime() - lastDropTime > 1000000000)
-			spawnRaindrop();
-
-		// move the raindrops, remove any that are beneath the bottom edge of
-		// the screen or that hit the bucket. In the latter case we play back
-		// a sound effect as well.
-		for (Iterator<Rectangle> iter = raindrops.iterator(); iter.hasNext();) {
-			Rectangle raindrop = iter.next();
-			raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
-			if (raindrop.y + 64 < 0)
-				iter.remove();
-			if (raindrop.overlaps(bucket)) {
-				dropSound.play();
-				iter.remove();
-			}
-		}
+	public void cameraOrbit(){
+		double dt = Gdx.graphics.getDeltaTime();
+		double ms = Math.toRadians(60.0f)*dt;
+		total_angle+= ms;
+		double total_dist = 3 * 2 * Math.sin(ms/2.0f);
+		double new_x = mainCamera.position.x + Math.cos(total_angle) * total_dist;
+		double new_z = mainCamera.position.z - Math.sin(total_angle) * total_dist; 
+		mainCamera.position.set((float) new_x, 0, (float) new_z);
+		mainCamera.lookAt(0f,0f,0f);
 	}
 
 	@Override
-	public void dispose() {
-		// dispose of all the native resources
-		dropImage.dispose();
-		bucketImage.dispose();
-		dropSound.dispose();
-		rainMusic.dispose();
-		batch.dispose();
+	public void dispose () {
+		modelBatch.dispose();
+		cubeModel.dispose();
 	}
 }
