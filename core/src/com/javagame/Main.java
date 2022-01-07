@@ -58,6 +58,8 @@ public class Main extends ApplicationAdapter {
 		// cubeInstance = new ModelInstance(cubeModel, 0, 0, 0);
 		GameObject agent = factory.CreateAgent(new Vector3(0,0,0), new Quaternion());
 		gameObjects.add(agent);
+		GameObject player = factory.CreatePlayer(new Vector3(0,0,0), new Quaternion());
+		gameObjects.add(player);
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f, 0.8f, 0.8f, 1f));
 	}

@@ -31,4 +31,17 @@ public class GameObjectFactory {
         agent.init(position, orientation);//initialize agent gameobject
         return agent;
     }
+
+    public GameObject CreatePlayer(Vector3 position, Quaternion orientation)
+    {
+        // Model playerModel = modelBuilder.createCapsule(1.0f, 3.0f, 1, new Material(ColorAttribute.createDiffuse(Color.BLUE)), VertexAttributes.Usage.Position|VertexAttributes.Usage.Normal);
+        Model playerModel = modelBuilder.createBox(2f, 2f, 2f,
+        new Material(ColorAttribute.createDiffuse(Color.BLUE)), 
+        VertexAttributes.Usage.Position|VertexAttributes.Usage.Normal
+); 
+
+        GameObject player = new GameObject(new ModeledGraphicsComponent(playerModel), new AgentPhysicsComponent(), new PlayerControllerComponent());
+        player.init(position, orientation);
+        return player;
+    }
 }

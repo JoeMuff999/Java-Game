@@ -10,6 +10,6 @@ public class AgentControllerComponent extends ControllerComponent{
     public void update(GameObject gameObject, float deltaTime)
     {
         // System.out.println(Acceleration * deltaTime);
-        gameObject.velocity.add(0, 0, -1 * Acceleration * deltaTime);
+        gameObject.velocity.add(-1 * Acceleration * deltaTime, 0, 0);
     }
 }
