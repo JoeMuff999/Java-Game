@@ -1,0 +1,16 @@
+parent-child relaionship in Game objects -> this will resolve camera issues
+    GO hierarchy
+physics components references to each other
+main loop -> game programming book 
+collisions
+scene manager
+    serialized scene storage (json?) 
+    gameobject hierarchy 
+    UI to create scenes 
+
+purpose of this project:
+    1. learn more about game programming paradigms (because its fun and satisfying)
+    2. make a game
+realistically, if I really wanted to make a game quickly, I would just do it in Unity (and i probably will ;) ) 
+
+game stuff:
