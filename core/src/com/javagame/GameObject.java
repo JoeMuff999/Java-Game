@@ -4,15 +4,20 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+
 
 public class GameObject {
     
-    public Vector3 position;
-    public Vector3 velocity;
-    public Quaternion orientation;
+    public Vector3 position = new Vector3(0,0,0);
+    public Quaternion orientation = new Quaternion(0,0,0,1);
     public String id; //TODO: set this eventually 
 
+
     private GraphicsComponent graphics_;
+    @Getter
     private PhysicsComponent physics_;
     private ControllerComponent controller_;
 
@@ -27,7 +32,6 @@ public class GameObject {
     {
         this.position = position;
         this.orientation = orientation;
-        this.velocity = new Vector3(0,0,0);
         graphics_.init(this);
     }
 

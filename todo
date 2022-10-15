@@ -13,4 +13,7 @@ purpose of this project:
     2. make a game
 realistically, if I really wanted to make a game quickly, I would just do it in Unity (and i probably will ;) ) 
 
+october 15 - decoupled physics from controllers. made an AddForce method in PhysicsComponent for communicating with physics. 
+Used a queue for forces -> eventually can make this concurrent if we keep physics on a separate thread (https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html)
+
 game stuff:

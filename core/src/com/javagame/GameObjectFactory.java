@@ -8,8 +8,6 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.math.*;
 
 
-
-
 public class GameObjectFactory {
 	private ModelBuilder modelBuilder;
     

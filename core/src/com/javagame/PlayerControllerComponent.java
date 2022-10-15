@@ -8,14 +8,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector3;
 
 public class PlayerControllerComponent extends ControllerComponent {
-    
-    public float Acceleration = 1;
 
     @Override
     public void update(GameObject gameObject, float deltaTime)
     {
         Vector3 velocityDelta = Vector3.Zero;
-        gameObject.velocity = Vector3.Zero;
+        // gameObject.velocity = Vector3.Zero;
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT))
         {
             velocityDelta.add(Utils.LEFT);
@@ -37,11 +35,14 @@ public class PlayerControllerComponent extends ControllerComponent {
         {
             velocityDelta.add(Utils.UP);
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
+        if(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
         {
             velocityDelta.add(Utils.DOWN);
         }
-        gameObject.velocity.mulAdd(velocityDelta, deltaTime);
+
+        gameObject.getPhysics_().addForce(velocityDelta.scl(deltaTime));
+
+        // gameObject.velocity.mulAdd(velocityDelta, deltaTime);
         // System.out.println(gameObject.velocity);
     }
     
