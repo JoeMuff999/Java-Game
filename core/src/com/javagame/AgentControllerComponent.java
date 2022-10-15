@@ -3,17 +3,28 @@ package com.javagame;
 import com.badlogic.gdx.math.Vector3;
 
 /**
- * I dont want to use this class. There should not be a controller class, but rather just an input class. The physics should handle the movement of an AI agent.
+ * Demonstration of using transform translations (similar to Unity Transform.Translate) as opposed to adding forces to the rigidbody
  */
 
 public class AgentControllerComponent extends ControllerComponent{
     
-    public float Acceleration = 1;
+    // public float Acceleration = 1;
+    Vector3 startPosition = new Vector3(-3,0,0);
+    Vector3 endPosition = new Vector3(3,0,0);
+    Vector3 target = startPosition;
+    float speed = 1.0f;
 
     @Override
     public void update(GameObject gameObject, float deltaTime)
     {
-        // System.out.println(Acceleration * deltaTime);
-        // gameObject.velocity.add(-1 * Acceleration * deltaTime, 0, 0);
+        if(gameObject.position.dst(target) < 0.001f){
+            if(target == startPosition)
+                target = endPosition;
+            else
+                target = startPosition;
+        }
+        Vector3 toTarget = target.sub(gameObject.position).nor();
+        gameObject.position.mulAdd(toTarget, deltaTime);
+        // System.out.println(gameObject.position);
     }
 }

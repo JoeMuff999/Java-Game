@@ -15,7 +15,6 @@ public class GameObject {
     public Quaternion orientation = new Quaternion(0,0,0,1);
     public String id; //TODO: set this eventually 
 
-
     private GraphicsComponent graphics_;
     @Getter
     private PhysicsComponent physics_;
@@ -39,7 +38,8 @@ public class GameObject {
     {
         controller_.update(this, deltaTime);
         graphics_.update(this, modelBatch);
-        if(updatePhysics)
+        if(updatePhysics) {
             physics_.update(this, fixedTime);
+        }
     }
 }

@@ -13,14 +13,15 @@ public class AgentPhysicsComponent extends PhysicsComponent{
     @Override
     public void update(GameObject gameObject, float fixedDelta)
     {
+        // System.out.println(gameObject.toString() + " " + forceQueue.size());
         //for concurrency, we would need to copy the forceQueue before emptying it. This is only if physics is running on a separate thread 
-        Vector3 forceDelta = Vector3.Zero;
+        Vector3 forceDelta = new Vector3();
         while(forceQueue.peek() != null) {
             forceDelta.add(forceQueue.poll());
+            assert false;
         }
         velocity.mulAdd(forceDelta, 1.0f/mass); // velocity += force/mass
         velocity.clamp(0, MaxSpeed);
         gameObject.position.mulAdd(velocity, fixedDelta);
-        // System.out.println(gameObject.position);
     }
 }
